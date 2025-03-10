@@ -44,12 +44,14 @@ export default function Navbar({ showBackButton = false }: NavbarProps) {
 
 	return (
 		<header className="p-4 flex items-center justify-between">
-			<div className="flex items-center gap-2">
-				<Banana className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
-				<div className="text-lg sm:text-xl font-medium text-zinc-200">
-					bananatype
+			<Link href="/">
+				<div className="flex items-center gap-2">
+					<Banana className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
+					<div className="text-lg sm:text-xl font-medium text-zinc-200">
+						bananatype
+					</div>
 				</div>
-			</div>
+			</Link>
 
 			{/* Desktop Navigation */}
 			<div className="hidden md:flex items-center gap-6">

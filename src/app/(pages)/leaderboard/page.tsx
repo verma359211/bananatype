@@ -44,7 +44,6 @@ export default function LeaderboardPage() {
         setError('Failed to load leaderboard. Please try again later.')
       }
     }
-
     fetchLeaderboard()
   }, [])
 

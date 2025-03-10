@@ -10,7 +10,7 @@ connectDb();
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request:NextRequest){
     try{
-        const users = await User.find().sort({topSpeed:-1}).limit(10).select("fullname username topSpeed  testAttempted");
+        const users = await User.find().sort({topSpeed:-1});
         return NextResponse.json({message:"leaderboard found",users},{status:200})
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
     }catch(error:any){

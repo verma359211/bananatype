@@ -2,7 +2,7 @@ const sampleParagraphs = {
   "paragraphs": [
     {
       "id": 1,
-      "text": "the beach is a calm place to rest waves are soft the sand is warm and the wind is cool people love to swim build in sand or just sit and enjoy the view the sunsets are bright and colorful and sometimes you may even see dolphins swimming in the sea"
+      "text": "the beach is a calm place to rest views in spring flowers bloom and cover the hills in winter they are covered in snow making them perfect for skiing the top of a mountain shows how wide and vast the world is a forest is quiet and full of life birds sing and the trees move with the wind sunlight comes through the trees making the ground glow you can walk on soft paths and hear the sounds of nature you might even see small animals like rabbits or deer hiding nearby"
     },
     {
       "id": 2,
