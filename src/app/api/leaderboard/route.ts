@@ -1,10 +1,11 @@
 import connectDb from "@/dbconfig/dbconfig";
 // import { getDataFromToken } from "@/lib/getDataFromToken";
 import User from "@/models/user.model";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 
-export async function GET() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(request: NextRequest) {
     await connectDb();
     try {
         console.log("Fetching leaderboard data...");
