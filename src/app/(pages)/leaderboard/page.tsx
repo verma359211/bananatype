@@ -35,9 +35,12 @@ export default function LeaderboardPage() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await axios.get("/api/leaderboard");
+        const res = await fetch("/api/leaderboard", { cache: "no-store" });
+        // const res = await axios.get("/api/leaderboard");
         toast.success('Leaderboard fetched successfully')
-        setLeaderboard(res.data)
+        const data = await res.json();
+        setLeaderboard(data)
+        // setLeaderboard(res.data)
       } catch (err) {
         console.error('Error fetching leaderboard:', err)
         toast.error('Failed to load leaderboard.')
