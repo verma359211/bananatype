@@ -8,6 +8,7 @@ connectDb();
 
 export async function POST(request: NextRequest) {
     try {
+        console.log("Login Processingggggggg");
         const reqBody = await request.json();
         const { email, password } = reqBody;
 
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
 
         response.cookies.set("token", token, { httpOnly: true });
 
+        console.log("Login Done");
         return response;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
