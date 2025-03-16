@@ -35,14 +35,7 @@ export default function LeaderboardPage() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await axios.get("/api/leaderboard", {
-					headers: {
-						"Cache-Control": "no-cache, no-store, must-revalidate",
-						Pragma: "no-cache",
-						Expires: "0",
-					},
-					params: { nocache: Date.now() }, // Add a timestamp to prevent caching
-				});
+        const res = await axios.get("/api/leaderboard");
         toast.success('Leaderboard fetched successfully')
         setLeaderboard(res.data)
       } catch (err) {

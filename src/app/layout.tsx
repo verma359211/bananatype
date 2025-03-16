@@ -5,7 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from '@/components/theme-providers';
 
 
-
+export const fetchCache = "force-no-store";
 
 export const metadata: Metadata = {
   title: "bananaType",
