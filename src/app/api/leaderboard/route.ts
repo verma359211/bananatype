@@ -1,4 +1,4 @@
-import { connectDb } from "@/dbconfig/dbconfig";
+import connectDb from "@/dbconfig/dbconfig";
 // import { getDataFromToken } from "@/lib/getDataFromToken";
 import User from "@/models/user.model";
 import { NextResponse } from "next/server";

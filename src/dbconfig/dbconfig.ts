@@ -33,7 +33,7 @@ type ConnectionObject = {
 
 const connection: ConnectionObject = {};
 
-export async function connectDb(): Promise<void> {
+async function connectDb(): Promise<void> {
   console.log("Going for check");
 	// Check if we have a connection to the database or if it's currently connecting
 	if (connection.isConnected) {
@@ -54,3 +54,5 @@ export async function connectDb(): Promise<void> {
 		process.exit(1);
 	}
 }
+
+export default connectDb;
