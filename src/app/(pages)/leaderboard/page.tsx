@@ -35,7 +35,7 @@ export default function LeaderboardPage() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await axios.get('/api/leaderboard')
+        const res = await axios.get(`/api/leaderboard?timestamp=${Date.now()}`);
         toast.success('Leaderboard fetched successfully')
         setLeaderboard(res.data)
       } catch (err) {
