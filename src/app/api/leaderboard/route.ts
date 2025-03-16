@@ -6,8 +6,10 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     await connectDb();
-    try{
+    try {
+        console.log("Fetching leaderboard data...");
         const users = await User.find({});
+        console.log("Fetched Users:", users);
         return NextResponse.json({ message: "leaderboard found", users }, {
             status: 200, headers: {
                 "Cache-Control": "no-store", // Prevents Next.js from caching
