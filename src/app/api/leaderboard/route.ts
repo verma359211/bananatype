@@ -3,11 +3,10 @@ import connectDb from "@/dbconfig/dbconfig";
 import User from "@/models/user.model";
 import { NextResponse } from "next/server";
 
-connectDb();
-
 //leaderboard api send the top 10 users with thier username , topSpeed and avgSpeed and testAttempted 
 
-export async function GET(){
+export async function GET() {
+    await connectDb();
     try{
         const users = await User.find().sort({topSpeed:-1});
         return NextResponse.json({message:"leaderboard found",users},{status:200})
