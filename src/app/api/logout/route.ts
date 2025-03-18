@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { NextRequest,NextResponse } from "next/server";
 
 
-export async  function GET(request:NextRequest,response:NextResponse){
+export async  function GET(request:NextRequest){
 
     try {
       const response =  NextResponse.json({message:'Logout successful',success:true}) 
