@@ -197,14 +197,14 @@ export default function Homepage() {
 						<Hash className="h-3 w-3 sm:h-4 sm:w-4" />
 						<span>numbers</span>
 					</button> */}
-					<button className="bg-yellow-500/20 text-yellow-500 px-2 sm:px-3 py-1 rounded text-xs sm:text-sm flex items-center gap-1 sm:gap-2 hover:bg-yellow-500/30">
+					{/* <button className="bg-yellow-500/20 text-yellow-500 px-2 sm:px-3 py-1 rounded text-xs sm:text-sm flex items-center gap-1 sm:gap-2 hover:bg-yellow-500/30">
 						<Clock className="h-3 w-3 sm:h-4 sm:w-4" />
 						<span>time</span>
 					</button>
 					<button className="bg-zinc-800 px-2 sm:px-3 py-1 rounded text-xs sm:text-sm flex items-center gap-1 sm:gap-2 hover:bg-zinc-700">
 						<AlignLeft className="h-3 w-3 sm:h-4 sm:w-4" />
 						<span>words</span>
-					</button>
+					</button> */}
 					{/* <button className="bg-zinc-800 px-2 sm:px-3 py-1 rounded text-xs sm:text-sm flex items-center gap-1 sm:gap-2 hover:bg-zinc-700">
 						<Quote className="h-3 w-3 sm:h-4 sm:w-4" />
 						<span>quote</span>
