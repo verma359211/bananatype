@@ -118,7 +118,7 @@ export default function Homepage() {
 					console.log("Result stored:", response.data);
 					toast.success("Result stored successfully");
 				} catch (error) {
-					toast.error("Failed to store result");
+					toast.error("Sign in to store result");
 					console.log("Error while storing the result", error);
 				}
 			};
