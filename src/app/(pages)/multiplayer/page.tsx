@@ -464,15 +464,14 @@ export default function MultiplayerPage() {
 									</div>
 								</div>
 
-								{isAdmin &&
-									!isTestRunning && !showCountdown &&(
-										<button
-											className="bg-yellow-500 text-zinc-900 px-3 sm:px-4 py-1 sm:py-2 rounded text-xs sm:text-sm font-medium hover:bg-yellow-400 w-full sm:w-auto"
-											onClick={startTest}
-										>
-											Start Race
-										</button>
-									)}
+								{isAdmin && !isTestRunning && !showCountdown && (
+									<button
+										className="bg-yellow-500 text-zinc-900 px-3 sm:px-4 py-1 sm:py-2 rounded text-xs sm:text-sm font-medium hover:bg-yellow-400 w-full sm:w-auto"
+										onClick={startTest}
+									>
+										Start Race
+									</button>
+								)}
 							</div>
 
 							<div>
@@ -486,15 +485,17 @@ export default function MultiplayerPage() {
 											key={playerId}
 											// className="bg-zinc-700 rounded p-3 flex justify-between items-center"
 											className={`bg-zinc-700 rounded p-3 flex justify-between items-center ${
-												isAdmin ? "border border-yellow-500/30" : ""
-											}`}
+												player.role === "admin" ? "border border-yellow-500/30" : ""
+											} ${player.name === username ? "text-yellow-500" : ""}`}
 										>
 											<div className="flex items-center gap-2 sm:gap-3">
-												<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-zinc-600 flex items-center justify-center text-xs">
-													KW
+												<div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-zinc-600 flex items-center justify-center text-lg">
+													{player.name.substring(0,1)}
 												</div>
 												<div>
-													<div className="font-medium text-xs sm:text-sm">
+													<div
+														className="flex font-medium text-xs sm:text-sm"
+													>
 														{player.name}
 													</div>
 
