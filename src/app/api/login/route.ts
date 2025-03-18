@@ -36,9 +36,10 @@ export async function POST(request: NextRequest) {
         }
 
         const tokenData = {
-            id: existingUser._id,
-            email: existingUser.email,
-        };
+					id: existingUser._id,
+					email: existingUser.email,
+					username: existingUser.username,
+				};
 
         const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {
             expiresIn: "1d",
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
             { status: 200 }
         );
 
-        response.cookies.set("token", token, { httpOnly: true });
+        response.cookies.set("token", token, { httpOnly: false });
 
         console.log("Login Done");
         return response;

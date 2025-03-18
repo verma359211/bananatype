@@ -2,7 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { ThemeProvider } from '@/components/theme-providers';
+// import { ThemeProvider } from '@/components/theme-providers';
 
 
 export const fetchCache = "force-no-store";
@@ -20,17 +20,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body> 
-      <ThemeProvider
+      {/* <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
-          >
+          > */}
         {/* <Navbar /> */}
         {children}
         {/* <Footer /> */}
         <Analytics />
-        </ThemeProvider>
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );

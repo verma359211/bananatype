@@ -2,7 +2,7 @@
 "use client";
 
 // import { Clock } from "lucide-react";
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,14 @@ import sampleParagraphs from "@/data/sampleParagraphs";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import axios from "axios";
+import { getCookie } from "cookies-next";
+import { jwtDecode } from "jwt-decode";
 
 interface Player {
+	id: string;
+	name: string;
+	role: string;
+	typedText: "";
 	wpm: number;
 	accuracy: number;
 }
@@ -25,9 +31,15 @@ interface Players {
 
 interface RoomEvent {
 	roomId: string;
-	isAdmin?: boolean;
-	text?: string;
-	players?: Players;
+	isAdmin: boolean;
+	roomname: string;
+	admin: string;
+	players: Players;
+}
+interface DecodedToken {
+	id: string;
+	exp: number;
+	username: string;
 }
 
 const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
@@ -35,12 +47,15 @@ const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
 export default function MultiplayerPage() {
 
 	const [selectedTimeOption, setSelectedTimeOption] = useState<number>(30);
+	const [adminid, setAdminid] = useState<string>("");
 	const [roomId, setRoomId] = useState<string>("");
+	const [roomname, setRoomname] = useState<string>("");
 	const [players, setPlayers] = useState<Players>({});
 	const [text, setText] = useState<string>("");
 	const [typedText, setTypedText] = useState<string>("");
 	const [wpm, setWpm] = useState<number>(0);
 	const [accuracy, setAccuracy] = useState<number>(0);
+	const [keystroke, setKeyStroke] = useState<number>(0);
 	const [timeLeft, setTimeLeft] = useState<number>(30);
 	const [isTestRunning, setIsTestRunning] = useState<boolean>(false);
 	const [resultsDisplayed, setResultsDisplayed] = useState<boolean>(false);
@@ -49,24 +64,48 @@ export default function MultiplayerPage() {
 	const [showCountdown, setShowCountdown] = useState<boolean>(false);
 	const [isJoining, setIsJoining] = useState<boolean>(false);
 	const [isroomcreated, setisroomcreated] = useState<boolean>(false);
+	const inputRef = useRef<HTMLTextAreaElement>(null);
+	const [username, setUsername] = useState<string>("player");
+	
+	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setRoomname(event.target.value); // Update state with input value
+	};
 
+	useEffect(() => {
+		if (isTestRunning && inputRef.current) {
+			inputRef.current.focus(); // Focus the input when isActive becomes true
+		}
+	}, [isTestRunning]);
+
+	useEffect(() => {
+			const fetchUser = async () => {
+				const token = getCookie("token");
+				if (token && !(token instanceof Promise)) {
+					try {
+						const decoded: DecodedToken = jwtDecode(token);
+						setUsername(decoded.username);
+					} catch (error) {
+						console.error("Invalid token:", error);
+					}
+				}
+			};
+			fetchUser();
+	}, []);
+	
 	const createRoom = async () => {
 		const newRoomId = Math.random().toString(36).substring(2, 9);
 		setRoomId(newRoomId);
-		let newuserId = "";
-		try {
-			const response = await axios.get("/api/profile");
-			newuserId = response.data.user.username;
-		} catch (error) {
-			console.error("Failed to fetch profile data:", error);
-		}
-		socket.emit("createRoom", { roomId: newRoomId, userId: newuserId });
+		socket.emit("createRoom", {
+			roomId: newRoomId,
+			roomName: roomname,
+			username: username,
+		});
 	};
 
 	const joinRoom = (id: string): void => {
 		setIsJoining(true);
 		setRoomId(id);
-		socket.emit("joinRoom", { roomId: id });
+		socket.emit("joinRoom", { roomId: id, username: username });
 		setTimeout(() => {
 			setIsJoining(false);
 		}, 2000);
@@ -99,6 +138,7 @@ export default function MultiplayerPage() {
 			}
 			const typed = e.target.value;
 			setTypedText(typed);
+			setKeyStroke(keystroke + 1);
 	
 			// Calculate accuracy.
 			const charactersTyped = typed.length;
@@ -110,7 +150,7 @@ export default function MultiplayerPage() {
 				}
 			}
 			const accuracyValue =
-				charactersTyped > 0 ? (correctCount / charactersTyped) * 100 : 100;
+				keystroke > 0 ? (correctCount / keystroke) * 100 : 0;
 			setAccuracy(accuracyValue);
 	
 			// Calculate words per minute.
@@ -129,26 +169,6 @@ export default function MultiplayerPage() {
 				wpm: wpmValue
 			});
 		};
-	// const handleTyping = (e: ChangeEvent<HTMLTextAreaElement>): void => {
-	// 	if (!isTestRunning) return;
-	// 	const input = e.target.value;
-	// 	setTypedText(input);
-
-	// 	const correctChars = [...input].filter(
-	// 		(char, idx) => char === text[idx]
-	// 	).length;
-	// 	const newAccuracy = (correctChars / input.length) * 100 || 100;
-	// 	const wordsTyped = input.length / 5;
-	// 	const newWpm = parseFloat((wordsTyped / ((60 - timeLeft) / 60)).toFixed(2));
-
-	// 	setWpm(newWpm);
-	// 	setAccuracy(newAccuracy);
-
-	// 	socket.emit("updateProgress", {
-	// 		roomId,
-	// 		typedText: input,
-	// 	});
-	// };
 
 	const paragraphs = sampleParagraphs.paragraphs.map((p) => p.text);
 
@@ -159,23 +179,27 @@ export default function MultiplayerPage() {
 	}, []);
 
 	useEffect(() => {
-		socket.on("roomCreated", ({ roomId, isAdmin: adminStatus }: RoomEvent) => {
-			setIsAdmin(adminStatus || false);
+		socket.on("roomCreated", ({ roomId, username: userName, room }) => {
+			setIsAdmin(userName === room.admin || false);
+			setAdminid(room.admin);
+			setRoomname(room.roomname);
 			setisroomcreated(true);
 		});
 
-		socket.on(
-			"roomJoined",
-			({ text: roomText, isAdmin: adminStatus }: RoomEvent) => {
-				setIsAdmin(adminStatus || false);
-			}
-		);
+		socket.on("roomJoined", ({ roomId, username: userName, room }) => {
+			setIsAdmin(userName === room.admin);
+			setAdminid(room.admin);
+			setRoomname(room.roomname);
+			setisroomcreated(true);
+		});
 
 		socket.on("updateLeaderboard", ({ players }: RoomEvent) => {
 			setPlayers(players || {});
 		});
 
 		socket.on("playerJoined", ({ players }: RoomEvent) => {
+			// setAdminid(room.admin);
+			// setRoomname(room.roomname);
 			setPlayers(players || {});
 		});
 
@@ -238,6 +262,8 @@ export default function MultiplayerPage() {
 										<input
 											type="text"
 											placeholder="Room name"
+											value={roomname} // Controlled input
+											onChange={handleInputChange} // Handle input change
 											className="w-full bg-zinc-700 border border-zinc-600 rounded px-3 py-2 focus:outline-none focus:border-yellow-500 text-sm"
 										/>
 										{/* <input
@@ -245,7 +271,7 @@ export default function MultiplayerPage() {
 											placeholder="Your nickname"
 											className="w-full bg-zinc-700 border border-zinc-600 rounded px-3 py-2 focus:outline-none focus:border-yellow-500 text-sm"
 										/> */}
-										<select
+										{/* <select
 											defaultValue="6"
 											className="w-full bg-zinc-700 border border-zinc-600 rounded px-3 py-2 focus:outline-none focus:border-yellow-500 text-sm"
 											disabled
@@ -255,7 +281,7 @@ export default function MultiplayerPage() {
 											<option value="4">4 players</option>
 											<option value="5">5 players</option>
 											<option value="6">6 players</option>
-										</select>
+										</select> */}
 
 										<button
 											onClick={createRoom}
@@ -346,7 +372,7 @@ export default function MultiplayerPage() {
 						<div className="bg-zinc-800 rounded-lg p-4 sm:p-6 mb-4">
 							<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-0">
 								<h2 className="text-lg sm:text-xl font-medium text-yellow-500">
-									Room Name
+									{roomname}
 								</h2>
 								<div className="flex flex-wrap gap-2">
 									<div className="bg-zinc-700 px-2 py-1 rounded text-xs">
@@ -375,6 +401,7 @@ export default function MultiplayerPage() {
 									{/* The textarea is disabled when the test has ended */}
 
 									<textarea
+										ref={inputRef}
 										value={typedText}
 										onChange={handleTyping}
 										disabled={!isTestRunning}
@@ -437,14 +464,15 @@ export default function MultiplayerPage() {
 									</div>
 								</div>
 
-								{isAdmin && (
-									<button
-										className="bg-yellow-500 text-zinc-900 px-3 sm:px-4 py-1 sm:py-2 rounded text-xs sm:text-sm font-medium hover:bg-yellow-400 w-full sm:w-auto"
-										onClick={startTest}
-									>
-										Start Race
-									</button>
-								)}
+								{isAdmin &&
+									!isTestRunning && !showCountdown &&(
+										<button
+											className="bg-yellow-500 text-zinc-900 px-3 sm:px-4 py-1 sm:py-2 rounded text-xs sm:text-sm font-medium hover:bg-yellow-400 w-full sm:w-auto"
+											onClick={startTest}
+										>
+											Start Race
+										</button>
+									)}
 							</div>
 
 							<div>
@@ -467,11 +495,11 @@ export default function MultiplayerPage() {
 												</div>
 												<div>
 													<div className="font-medium text-xs sm:text-sm">
-														{playerId.slice(0, 6).toLowerCase()}
+														{player.name}
 													</div>
 
 													<div className="text-xs text-zinc-400">
-														{isAdmin ? "Admin" : "Ready"}
+														{player.role === "admin" ? "Admin" : ""}
 													</div>
 												</div>
 											</div>
@@ -482,7 +510,7 @@ export default function MultiplayerPage() {
 														{Math.round(player.wpm)} WPM
 													</div>
 													<div className="text-xs text-zinc-400">
-														92% accuracy
+														{Math.round(player.accuracy)}% accuracy
 													</div>
 												</div>
 												<div className="w-1 h-10 sm:h-12 bg-yellow-500 rounded-full"></div>

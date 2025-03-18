@@ -9,7 +9,7 @@ connectDb();
 export async function PUT(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        const { speed, accuracy } = reqBody;
+        const { speed, accuracy, mode } = reqBody;
 
         // Verify user token
         const reqUserId = getDataFromToken(request);
@@ -39,28 +39,49 @@ export async function PUT(request: NextRequest) {
 
         // Default to 0 if fields are undefined
         const currentAvgSpeed = user.avgSpeed || 0;
+        const currentAvgaccuracy = user.avgaccuracy || 0;
         const currentTestAttempted = user.testAttempted || 0;
         const currentTopSpeed = user.topSpeed || 0;
         const currentAccuracy = user.accuracy || 0;
 
         // Calculate new metrics
         const totalSpeed = currentAvgSpeed * currentTestAttempted + speed;
+        const totalaccuracy = currentAvgaccuracy * currentTestAttempted + accuracy;
         const newTestAttempted = currentTestAttempted + 1;
         const newAvgSpeed = Math.round(totalSpeed / newTestAttempted);
+        const newAvgaccuracy = Math.round(totalaccuracy / newTestAttempted);
         const newTopSpeed = Math.max(currentTopSpeed, speed);
         const newAccuracy = Math.max(currentAccuracy, accuracy);
+
+
+       const now = new Date();
+		const options: Intl.DateTimeFormatOptions = {
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+			hour12: true, // Optional: Change to false for 24-hour format
+		};
+
+		const time = new Intl.DateTimeFormat("en-US", options).format(now);
 
         // Add new history entry
         const historyEntry = {
             speed,
             accuracy,
-            testPlayed: new Date(),
+            mode,
+            testPlayed: time
         };
         user.history.push(historyEntry);
+
+        
 
         // Update user
         user.testAttempted = newTestAttempted;
         user.avgSpeed = newAvgSpeed;
+        user.avgaccuracy = newAvgaccuracy;
         user.topSpeed = newTopSpeed;
         user.accuracy = newAccuracy;
         user.lastActive = new Date();

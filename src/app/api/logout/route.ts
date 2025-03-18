@@ -9,7 +9,7 @@ export async  function GET(request:NextRequest,response:NextResponse){
       const response =  NextResponse.json({message:'Logout successful',success:true}) 
 
       response.cookies.set("token","",{
-        httpOnly:true,
+        httpOnly:false,
         expires: new Date(0)
     })
 

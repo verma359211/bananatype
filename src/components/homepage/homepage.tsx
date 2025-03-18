@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import {
@@ -10,7 +11,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect, useRef} from "react";
 
 import sampleParagraphs from "@/data/sampleParagraphs";
 import axios from "axios";
@@ -21,10 +22,11 @@ import TestResults from "./test-results";
 
 export default function Homepage() {
 	const [selectedTimeOption, setSelectedTimeOption] = useState<number>(30);
-
+	const [mode, setMode] = useState<string>("time-30");
 	const [timeLeft, setTimeLeft] = useState<number>(selectedTimeOption);
 	const [isTestRunning, setIsTestRunning] = useState<boolean>(false);
 	const [typedText, setTypedText] = useState<string>("");
+	const [keystroke, setKeyStroke] = useState<number>(0);
 	const [text, setText] = useState<string>("");
 	const [accuracy, setAccuracy] = useState<number>(0);
 	const [wpm, setWpm] = useState<number>(0);
@@ -39,8 +41,9 @@ export default function Homepage() {
 	});
 
 	const handleTime = (p0: number): void => {
-		setSelectedTimeOption(p0);	
+		setSelectedTimeOption(p0);
 		setTimeLeft(p0);
+		setMode("time-" + p0);
 	};
 
 	// Returns a random sample text.
@@ -58,11 +61,12 @@ export default function Homepage() {
 
 	// Start the test on the first key press.
 	const startTest = (initialText: string = ""): void => {
+		setKeyStroke(1);
 		setIsTestRunning(true);
 		setTimeLeft(selectedTimeOption);
 		setTypedText(initialText);
 		setResultsDisplayed(false);
-		setAccuracy(100);
+		setAccuracy(0);
 		setWpm(0);
 	};
 
@@ -72,7 +76,8 @@ export default function Homepage() {
 		setResultsDisplayed(false);
 		setTypedText("");
 		setTimeLeft(selectedTimeOption);
-		setAccuracy(100);
+		setKeyStroke(1);
+		setAccuracy(0);
 		setWpm(0);
 		setText(selectRandomSampleText());
 	};
@@ -85,33 +90,20 @@ export default function Homepage() {
 		} else if (timeLeft === 0 && isTestRunning) {
 			calculateResults();
 			setIsTestRunning(false);
-			// setTestResults({
-			// 	wpm,
-			// 	accuracy,
-			// 	time: selectedTimeOption,
-			// 	characters: 0,
-			// 	correctChars: 0,
-			// 	incorrectChars: 0,
-			// });
 			setResultsDisplayed(true);
 		}
 	}, [testResults, isTestRunning, timeLeft]);
 
- function calculateResults() {
-		// const minutes = (selectedTimeOption - timeLeft) / 60;
-		// const totalChars = 0
-		// const wpm = Math.round(correctChars / 5 / (minutes || 0.01)); // 5 chars = 1 word
-		// const accuracy = Math.round((correctChars / (totalChars || 1)) * 100);
-
+	function calculateResults() {
 		setTestResults({
 			wpm,
 			accuracy,
 			time: selectedTimeOption,
 			characters: 0,
-			correctChars:0,
-			incorrectChars:0,
+			correctChars: 0,
+			incorrectChars: 0,
 		});
- }
+	}
 
 	// Store results in the DB when the test ends.
 	useEffect(() => {
@@ -121,6 +113,7 @@ export default function Homepage() {
 					const response = await axios.put("/api/store-result", {
 						speed: wpm,
 						accuracy: accuracy,
+						mode: mode,
 					});
 					console.log("Result stored:", response.data);
 					toast.success("Result stored successfully");
@@ -131,29 +124,21 @@ export default function Homepage() {
 			};
 			storeresult();
 		}
-	}, [resultsDisplayed, wpm, accuracy]);
+	}, [resultsDisplayed, wpm, accuracy, mode]);
 
-	// When the user types, if the test hasn't started, start it on the first key press.
-	const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
-		if (!isTestRunning && !resultsDisplayed) {
-			startTest(e.target.value);
-			return;
-		}
-		const typed = e.target.value;
-		setTypedText(typed);
-
+	useEffect(() => {
 		// Calculate accuracy.
+		const typed = typedText;
 		const charactersTyped = typed.length;
-		const correctChars = text.substring(0, charactersTyped);
 		let correctCount = 0;
 		for (let i = 0; i < charactersTyped; i++) {
-			if (typed[i] === correctChars[i]) {
+			if (typed[i] === text[i]) {
 				correctCount++;
 			}
 		}
-		const accuracyValue =
-			charactersTyped > 0 ? (correctCount / charactersTyped) * 100 : 100;
-		setAccuracy(accuracyValue);
+		const accuracyValue = keystroke > 0 ? (correctCount / keystroke) * 100 : 0;
+
+		setAccuracy(Math.round(accuracyValue));
 
 		// Calculate words per minute.
 		const words = typed
@@ -164,6 +149,23 @@ export default function Homepage() {
 		const wpmValue =
 			elapsedSeconds > 0 ? words.length / (elapsedSeconds / 60) : 0;
 		setWpm(Math.round(wpmValue));
+	}, [timeLeft, typedText]);
+
+	// When the user types, if the test hasn't started, start it on the first key press.
+	const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
+		if (!isTestRunning && !resultsDisplayed) {
+			startTest(e.target.value);
+			return;
+		}
+		const typed = e.target.value;
+		setTypedText(typed);
+		setKeyStroke(keystroke + 1);
+
+		if (isTestRunning && typed.length >= text.length) {
+			calculateResults();
+			setIsTestRunning(false);
+			setResultsDisplayed(true);
+		}
 	};
 
 	// Global listener: when Tab is pressed, reset the test.
@@ -179,7 +181,7 @@ export default function Homepage() {
 	});
 
 	return (
-		<div className="flex flex-col min-h-screen bg-zinc-900 text-zinc-300">
+		<div className="flex flex-col min-h-screen bg-zinc-800 text-zinc-300">
 			{/* Header */}
 			<Navbar />
 
@@ -249,16 +251,6 @@ export default function Homepage() {
 					>
 						60
 					</button>
-					<button
-						className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm ${
-							selectedTimeOption === 120
-								? "bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30"
-								: "hover:bg-zinc-800"
-						}`}
-						onClick={() => handleTime(120)}
-					>
-						120
-					</button>
 				</div>
 				{/* Language Selector */}
 				{/* <div className="mb-8">
@@ -268,7 +260,7 @@ export default function Homepage() {
 				</div> */}
 
 				{/* Typing Area */}
-				<div className="max-w-7xl w-full mb-8 text-lg">
+				<div className="max-w-7xl max-h-[50vh] w-full mb-8 text-lg">
 					<div className="flex items-center justify-between mb-4 mx-4">
 						<div className="flex items-center space-x-3 text-yellow-500">
 							{/* <Clock className="h-4 w-4" /> */}
@@ -276,69 +268,60 @@ export default function Homepage() {
 						</div>
 						<div className="flex items-center space-x-3">
 							{/* <AlertCircle className="h-4 w-4" /> */}
-							<span>{accuracy.toFixed(2)}%</span>
+							<span>{accuracy}%</span>
 						</div>
 						<div className="flex items-center space-x-3">
 							{/* <Trophy className="h-4 w-4" /> */}
 							<span>{wpm} wpm</span>
 						</div>
 					</div>
-
-					<div className="relative min-h-[200px] w-full rounded-lg text-2xl">
-						{/* The textarea is disabled when the test has ended */}
-						<textarea
-							value={typedText}
-							onChange={handleTyping}
-							disabled={resultsDisplayed}
-							className="absolute min-h-[200px] h-full w-full text-transparent resize-none caret-white bg-transparent p-0 font-inherit leading-relaxed tracking-wide focus:outline-none focus:ring-0"
-							style={{ wordSpacing: "0.25em" }}
-							onPaste={(e) => e.preventDefault()}
-							onContextMenu={(e) => e.preventDefault()}
-							autoFocus
-						/>
-
-						{/* Overlay that shows the sample text and typed text with color coding */}
+					<div className="h-[40vh] flex items-center justify-center">
 						<div
-							className="inset-0 pointer-events-none whitespace-pre-wrap break-words leading-relaxed tracking-wide"
-							style={{ wordSpacing: "0.25em" }}
-							aria-hidden="true"
+							className="relative min-h-[200px] w-full rounded-lg text-2xl overflow-y-auto h-full scrollbar-hide"
 						>
-							{Array.from({
-								length: Math.max(text.length, typedText.length),
-							}).map((_, index) => {
-								const sampleChar = text[index] || "";
-								const typedChar = typedText[index] || "";
-								let className = "text-gray-600";
-								if (index < typedText.length) {
-									if (sampleChar) {
-										className =
-											typedChar === sampleChar ? "text-white" : "text-red-500";
-									} else {
-										className = "text-red-500";
+							{/* The textarea is disabled when the test has ended */}
+							<textarea
+								value={typedText}
+								onChange={handleTyping}
+								disabled={resultsDisplayed}
+								className="absolute min-h-[200px] h-full w-full text-transparent resize-none caret-white bg-transparent p-0 font-inherit leading-relaxed tracking-wide focus:outline-none focus:ring-0"
+								style={{ wordSpacing: "0.25em" }}
+								onPaste={(e) => e.preventDefault()}
+								onContextMenu={(e) => e.preventDefault()}
+								autoFocus
+							/>
+
+							{/* Overlay that shows the sample text and typed text with color coding */}
+							<div
+								className="inset-0 pointer-events-none whitespace-pre-wrap break-words leading-relaxed tracking-wide"
+								style={{ wordSpacing: "0.25em" }}
+								aria-hidden="true"
+							>
+								{Array.from({
+									length: Math.max(text.length, typedText.length),
+								}).map((_, index) => {
+									const sampleChar = text[index] || "";
+									const typedChar = typedText[index] || "";
+									let className = "text-gray-600";
+									if (index < typedText.length) {
+										if (sampleChar) {
+											className =
+												typedChar === sampleChar
+													? "text-white"
+													: "text-red-500";
+										} else {
+											className = "text-red-500";
+										}
 									}
-								}
-								return (
-									<span key={index} className={className}>
-										{sampleChar || typedChar}
-									</span>
-								);
-							})}
+									return (
+										<span key={index} className={className}>
+											{sampleChar || typedChar}
+										</span>
+									);
+								})}
+							</div>
 						</div>
 					</div>
-
-					{/* {resultsDisplayed && (
-						<div className="space-y-4 mt-6">
-							<h2 className="text-3xl font-bold">Final Results</h2>
-							<p className="text-xl">
-								Your WPM: <span className="font-bold">{wpm}</span>
-							</p>
-							<p className="text-xl">
-								Your Accuracy:{" "}
-								<span className="font-bold">{accuracy.toFixed(2)}%</span>
-							</p>
-							<p className="text-lg">Press Tab to reset the test.</p>
-						</div>
-					)} */}
 				</div>
 				{/* Keyboard Shortcuts */}
 				<div className="text-zinc-500 text-sm mb-4">

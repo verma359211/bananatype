@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const fetchCache = "force-no-store";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
     await connectDb();
     try {
@@ -18,21 +17,22 @@ export async function GET(request: NextRequest) {
                     );
                 }
         // console.log("Fetching leaderboard data...");
-        const users = await User.find({});
+        const users = await User.find({ topSpeed: { $gt: 0 } })
+					.sort({
+						topSpeed: -1,
+					})
+					.lean();;
+        const rankedUsers = users.map((user, index) => ({
+					...user, // Keep existing fields like name, email, etc.
+					rank: index + 1, // Add a new rank field starting from 1
+				}));
         // console.log("Fetched Users:", users);
         return NextResponse.json(
-					{ message: "leaderboard found", users },
-					{
-						status: 200,
-						headers: {
-							"Cache-Control":
-								"no-store, no-cache, must-revalidate, proxy-revalidate", // No cache
-							Pragma: "no-cache",
-							Expires: "0",
-						},
-					}
+					{ message: "leaderboard found", users: rankedUsers },
+					{ status: 200 }
 				);
-    }catch(error : unknown){
-        return NextResponse.json({ message: "failed to load leaderboard \n\n"+error }, {status:500})
+    } catch (error: unknown) {
+        console.log(error);
+        return NextResponse.json({ message: "failed to load leaderboard"}, {status:500})
     }
 }

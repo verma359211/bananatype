@@ -55,8 +55,18 @@ export async function POST(request:NextRequest){
         const salt = await bcryptjs.genSalt(10);
         const hashedPassword = await bcryptjs.hash(password, salt);
         console.log("cret user");
-        
-        const newUser = new User({ username, password: hashedPassword,email, fullname });
+        const now = new Date();
+		const formattedDate = new Intl.DateTimeFormat("en-US", {
+			month: "long",
+            year: "numeric",
+        }).format(now);
+        const newUser = new User({
+					username,
+					password: hashedPassword,
+					email,
+					fullname,
+					joinDate: formattedDate,
+				});
 
         const savedUser =  newUser.save();
 
