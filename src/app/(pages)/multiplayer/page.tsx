@@ -243,7 +243,7 @@ export default function MultiplayerPage() {
 	return (
 		<div className="flex flex-col min-h-screen bg-zinc-900 text-zinc-300">
 			{/* Header */}
-			<Navbar showBackButton={true} />
+			<Navbar/>
 
 			{/* Main Content */}
 			<main className="flex-1 flex flex-col items-center px-3 sm:px-4 py-4 sm:py-8">

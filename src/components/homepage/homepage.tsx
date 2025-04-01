@@ -173,10 +173,9 @@ export default function Homepage() {
 	});
 
 	return (
-		<div className="flex flex-col min-h-screen bg-zinc-800 text-zinc-300">
+		<div className="flex flex-col min-h-screen bg-neutral-800 text-zinc-300">
 			{/* Header */}
 			<Navbar />
-
 			{/* Main Content */}
 			<main className="flex-1 flex flex-col items-center justify-center px-4">
 				{/* Test Options */}
@@ -294,7 +293,7 @@ export default function Homepage() {
 								}).map((_, index) => {
 									const sampleChar = text[index] || "";
 									const typedChar = typedText[index] || "";
-									let className = "text-gray-600";
+									let className = "text-gray-500";
 									if (index < typedText.length) {
 										if (sampleChar) {
 											className =
