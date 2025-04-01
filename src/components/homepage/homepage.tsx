@@ -1,17 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import {
-	AlignLeft,
-	// Hash,
-	Clock,
-	// Quote,
-	// Feather,
-	// Settings,
-} from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import React, { useState, useEffect, useRef} from "react";
+import React, { useState, useEffect} from "react";
 
 import sampleParagraphs from "@/data/sampleParagraphs";
 import axios from "axios";
