@@ -1,35 +1,32 @@
-// middleware.ts
-import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-const authRoutes = ["/login", "/signup"];
+export function middleware(req: NextRequest) {
+	const token = req.cookies.get("token")?.value; // Check if token exists
 
-export default withAuth(
-	// ① annotate req as NextRequestWithAuth so `req.nextauth` is available
-	(req: NextRequestWithAuth) => {
-		const { pathname } = req.nextUrl;
+	const protectedRoutes = [
+		"/profile",
+		"/leaderboard",
+		"/multiplayer",
+		"/logout",
+	];
+	const authRoutes = ["/login", "/signup"];
 
-		// 🚧 already signed in → block /login & /signup
-		if (req.nextauth.token && authRoutes.includes(pathname)) {
-			return NextResponse.redirect(new URL("/", req.url));
-		}
+	const requestedPath = req.nextUrl.pathname;
 
-		// ✅ otherwise, let NextAuth handle it
-		return NextResponse.next();
-	},
-	{
-		// ② only allow through if token exists
-		callbacks: {
-			authorized: ({ token }) => !!token,
-		},
-		// ③ redirect to this page when not authenticated
-		pages: {
-			signIn: "/login",
-		},
+	// 🛑 If user is NOT logged in, block access to protected routes
+	if (!token && protectedRoutes.includes(requestedPath)) {
+		return NextResponse.redirect(new URL("/login", req.url)); // Redirect to signin
 	}
-);
 
-// ④ apply only to these routes
+	// 🛑 If user IS logged in, block access to auth routes
+	if (token && authRoutes.includes(requestedPath)) {
+		return NextResponse.redirect(new URL("/", req.url)); // Redirect to home
+	}
+
+	return NextResponse.next(); // Allow request to proceed
+}
+
+// Apply middleware to specific routes
 export const config = {
 	matcher: [
 		"/profile",
