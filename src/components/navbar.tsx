@@ -58,6 +58,7 @@ export default function Navbar({ showBackButton = false }: NavbarProps) {
             await axios.get("/api/logout");
 			setIsLoggedin(false);
 			router.push("/");
+			router.refresh();
         } catch (error) {
             console.error("Error Logging Out", error);
         }
