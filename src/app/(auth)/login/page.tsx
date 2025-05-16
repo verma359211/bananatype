@@ -38,6 +38,7 @@ export default function LoginPage() {
       const userData = response.data.user; 
       login(userData); 
       toast.success('Logged in successfully');
+	  router.refresh();
       router.push('/');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
