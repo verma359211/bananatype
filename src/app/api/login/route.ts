@@ -47,8 +47,11 @@ export async function POST(request: NextRequest) {
 			expiresIn: "1d",
 		});
 
-		const response = NextResponse.redirect(new URL("/profile", request.url));
-
+		// const response = NextResponse.redirect(new URL("/profile", request.url));
+        const response = NextResponse.json(
+					{ message: "Login successful", success: true, token },
+					{ status: 200 }
+				);
 		// ✅ Set HttpOnly cookie
 		response.cookies.set("token", token, {
 			httpOnly: true,
