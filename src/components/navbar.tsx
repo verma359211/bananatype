@@ -11,58 +11,47 @@ import {
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { deleteCookie, getCookie } from "cookies-next";
+// import { deleteCookie, getCookie } from "cookies-next";
 // import jwt from "jsonwebtoken";
-import {jwtDecode} from "jwt-decode";
+// import {jwtDecode} from "jwt-decode";
 import  { useRouter } from "next/navigation";
 
 type NavbarProps = {
 	showBackButton?: boolean;
 };
-interface DecodedToken {
-	id: string;
-	exp: number;
-}
+// interface DecodedToken {
+// 	id: string;
+// 	exp: number;
+// }
 
 export default function Navbar({ showBackButton = false }: NavbarProps) {
     const pathname = usePathname();
 	const [isLoggedin, setIsLoggedin] = useState<boolean>();
 	const router = useRouter();
     
-    useEffect(() => {
-        const fetchUser = async () => {
-			const token = getCookie("token");
-			if (token && !(token instanceof Promise)) {
-				try {
-					const decoded: DecodedToken = jwtDecode(token);
-					console.log("TOKEN",decoded)
-					// const decodeToken:unknown = jwt.verify(token,process.env.TOKEN_SECRET!);
+	useEffect(() => {
+		const checkAuth = async () => {
+			try {
+				const res = await fetch("/api/me", {
+					method: "GET",
+					credentials: "include", // ✅ important to include HttpOnly cookies
+				});
 
-					if (decoded.exp * 1000 < Date.now()) {
-						// If token is expired
-						deleteCookie("token"); // Remove expired token
-						setIsLoggedin(false); // Redirect to sign-in
-					} else {
-						setIsLoggedin(true);
-					}
-				} catch (error) {
-					console.error("Invalid token:", error);
-					deleteCookie("token"); // Remove invalid token
+				const data = await res.json();
+
+				if (res.ok && data.isLoggedIn) {
+					setIsLoggedin(true);
+				} else {
 					setIsLoggedin(false);
 				}
-			} else {
+			} catch (error) {
+				console.error("Error checking login:", error);
 				setIsLoggedin(false);
 			}
+		};
 
-            // try {
-            //     await axios.get("/api/profile");
-            //     setIsLoggedin(true);
-            // } catch (error) {
-            //     console.error("Failed to fetch profile data:", error);
-            // }
-        };
-        fetchUser();
-    }, []);
+		checkAuth();
+	}, []);
 
     const handleLogout = async () => {
         try {
