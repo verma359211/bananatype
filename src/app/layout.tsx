@@ -1,8 +1,6 @@
-'use client'
 import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from "next";
-import { useEffect } from 'react'
-import { io } from 'socket.io-client'
+
 import "./globals.css";
 // import { ThemeProvider } from '@/components/theme-providers';
 
@@ -21,21 +19,7 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
-	useEffect(() => {
-    // 1) HTTP wake-ping
-    fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/`)
-      .catch(() => {/* ignore errors */})
-
-    // 2) Optional socket.io handshake
-    const wakeSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
-      autoConnect: true,
-      reconnection: false,
-    })
-    wakeSocket.on('connect', () => {
-      wakeSocket.disconnect()
-    })
-  }, [])
+}>)
   return (
 		<html lang="en">
 			<head>
