@@ -66,6 +66,20 @@ export default function MultiplayerPage() {
 	const [isroomcreated, setisroomcreated] = useState<boolean>(false);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 	const [username, setUsername] = useState<string>("player");
+
+	  const [loading, setLoading] = useState(true)
+	
+	  useEffect(() => {
+	    socket.on('connect', () => setLoading(false))
+	
+	    return () => {
+	      socket.disconnect()
+	    }
+	  }, [])
+	
+	  if (loading) {
+	    return <div>Waking server… please wait a moment.</div>
+	  }
 	
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setRoomname(event.target.value); // Update state with input value
