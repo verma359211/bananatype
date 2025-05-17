@@ -67,22 +67,22 @@ export default function MultiplayerPage() {
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 	const [username, setUsername] = useState<string>("player");
 
-	  const [loading, setLoading] = useState(true)
+	 //  const [loading, setLoading] = useState(true)
 	
-	  useEffect(() => {
-	    const s = io(process.env.NEXT_PUBLIC_SOCKET_URL)
-		  console.log("trying to connect");
-	    s.on('connect', () => setLoading(false))
-		console.log("connected");
-	    return () => {
-		console.log("disconnecting");
-	      s.disconnect()
-	    }
-	  }, [])
+	 //  useEffect(() => {
+	 //    const s = io(process.env.NEXT_PUBLIC_SOCKET_URL)
+		//   console.log("trying to connect");
+	 //    s.on('connect', () => setLoading(false))
+		// console.log("connected");
+	 //    return () => {
+		// console.log("disconnecting");
+	 //      s.disconnect()
+	 //    }
+	 //  }, [])
 	
-	  if (loading) {
-	    return <div>Waking server… please wait a moment.</div>
-	  }
+	 //  if (loading) {
+	 //    return <div>Waking server… please wait a moment.</div>
+	 //  }
 	
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setRoomname(event.target.value); // Update state with input value
