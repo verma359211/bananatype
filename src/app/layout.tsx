@@ -36,7 +36,7 @@ export default function RootLayout({
             disableTransitionOnChange
           > */}
 				{/* <Navbar /> */}
-				{children}
+{/* 				{children} */}
 				<WakeUp>{children}</WakeUp>
 				{/* <Footer /> */}
 				<Analytics />
