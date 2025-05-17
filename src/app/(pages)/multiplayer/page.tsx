@@ -70,10 +70,13 @@ export default function MultiplayerPage() {
 	  const [loading, setLoading] = useState(true)
 	
 	  useEffect(() => {
-	    socket.on('connect', () => setLoading(false))
-	
+	    const s = io(process.env.NEXT_PUBLIC_SOCKET_URL)
+		  console.log("trying to connect");
+	    s.on('connect', () => setLoading(false))
+		console.log("connected");
 	    return () => {
-	      socket.disconnect()
+		console.log("disconnecting");
+	      s.disconnect()
 	    }
 	  }, [])
 	
