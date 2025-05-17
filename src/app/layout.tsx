@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from "next";
-+import WakeUp from './WakeUp'
+import WakeUp from './WakeUp'
 import "./globals.css";
 // import { ThemeProvider } from '@/components/theme-providers';
 
