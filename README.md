@@ -1,6 +1,6 @@
-# Type Arena
+# Banana Type
 
-**Type Arena** is a fast-paced multiplayer typing game that challenges your typing speed and accuracy. Compete with others in real-time to prove you're the fastest typist in the arena!
+**Banana Type** is a fast-paced multiplayer typing game that challenges your typing speed and accuracy. Compete with others in real-time to prove you're the fastest typist in the arena!
 
 ## Table of Contents
 - [Features](#features)
@@ -36,7 +36,7 @@
 
 ## Getting Started
 
-Follow the instructions below to set up and run Type Arena on your local machine.
+Follow the instructions below to set up and run Banana Type on your local machine.
 
 ### Prerequisites
 
@@ -71,7 +71,7 @@ You will need to have the following installed on your system:
 
 ## Contributing
 
-We welcome contributions to enhance Type Arena! Here’s how you can contribute:
+We welcome contributions to enhance Banana Type! Here’s how you can contribute:
 
 1. Fork the repository.
 2. Create a new branch for your feature or fix:
